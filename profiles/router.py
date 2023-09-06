@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 
 from ..db import crud, schemas
 from ..db.utils import get_db
-from ..db import partial_update as pu
 
 
 router = APIRouter()
