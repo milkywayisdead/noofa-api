@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from ..db import crud, schemas
 from ..db.utils import get_db
+from ..db import partial_update as pu
 
 
 router = APIRouter()
@@ -42,6 +43,25 @@ def profiles_details(limit: int = 10, db: Session = Depends(get_db)):
     return profiles
 
 
+@router.post("/update_profile/{profile_id}", response_model=schemas.Profile)
+def update_profile(
+    profile_id: int,
+    profile: schemas.ProfileUpdate,
+    db: Session = Depends(get_db)
+):
+    profile = crud.update_profile(db, profile_id=profile_id, profile=profile)
+    return profile
+
+
+@router.post("/delete_profile/{profile_id}")
+def delete_profile(
+    profile_id: int,
+    db: Session = Depends(get_db)
+):
+    result = crud.delete_profile(db, profile_id)
+    return {'result': result, 'msg': f'Profile {profile_id} has been deleted'}
+
+
 @router.get("/test_connection/{profile_id}/{source_id}")
 def test_connection(
     profile_id: int,
@@ -72,3 +92,36 @@ def get_query_data(
     profile = crud.get_profile(db, profile_id=profile_id)
     rb = profile.get_report_builder()
     return rb.get_data(query_id)
+
+
+@router.get("/get_df_data/{profile_id}/{df_id}")
+def get_df_data(
+    profile_id: int,
+    df_id: str,
+    db: Session = Depends(get_db)
+):
+    profile = crud.get_profile(db, profile_id=profile_id)
+    rb = profile.get_report_builder()
+    return rb.get_data(df_id)
+
+
+@router.get("/get_table/{profile_id}/{table_id}")
+def get_table(
+    profile_id: int,
+    table_id: str,
+    db: Session = Depends(get_db)
+):
+    profile = crud.get_profile(db, profile_id=profile_id)
+    rb = profile.get_report_builder()
+    return rb.get_component(table_id)
+
+
+@router.get("/get_figure/{profile_id}/{figure_id}")
+def get_figure(
+    profile_id: int,
+    figure_id: str,
+    db: Session = Depends(get_db)
+):
+    profile = crud.get_profile(db, profile_id=profile_id)
+    rb = profile.get_report_builder()
+    return rb.get_component(figure_id)

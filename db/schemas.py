@@ -35,5 +35,5 @@ class ProfileDetails(BaseModel):
     last_update: datetime.datetime
 
 
-class ProfileUpdate(ProfileBase):
+class ProfileUpdate(BaseModel):
     last_update: datetime.datetime
