@@ -59,7 +59,9 @@ def _update_target(
     db.query(ProfileProxy).filter(
         ProfileProxy.id == profile_id
     ).update({target: func.json_set(
-        getattr(ProfileProxy, target),
-        key,
-        func.json(json.dumps(payload)),
-    )})
+            getattr(ProfileProxy, target),
+            key,
+            func.json(json.dumps(payload)),
+        ),
+        'last_update': datetime.now(),
+    })

@@ -29,6 +29,7 @@ class Profile(ProfileBase):
 
 
 class ProfileDetails(BaseModel):
+    id: int
     name: str
     description: str
     created: datetime.datetime
