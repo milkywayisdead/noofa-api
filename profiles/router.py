@@ -45,7 +45,7 @@ def profiles_details(limit: int = 10, db: Session = Depends(get_db)):
 @router.post("/update_profile/{profile_id}", response_model=schemas.Profile)
 def update_profile(
     profile_id: int,
-    profile: schemas.ProfileUpdate,
+    profile: dict,
     db: Session = Depends(get_db)
 ):
     profile = crud.update_profile(db, profile_id=profile_id, profile=profile)

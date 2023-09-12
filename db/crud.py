@@ -22,10 +22,9 @@ def create_profile(db: Session, profile: schemas.ProfileCreate):
     return db_profile
 
 
-def update_profile(db: Session, profile_id: int, profile: schemas.ProfileUpdate):
-    kw = profile.dict()
-    kw['last_update'] = datetime.now()
-    db.query(ProfileProxy).filter(ProfileProxy.id == profile_id).update(kw)
+def update_profile(db: Session, profile_id: int, profile: dict):
+    profile['last_update'] = datetime.now()
+    db.query(ProfileProxy).filter(ProfileProxy.id == profile_id).update(profile)
     db.commit()
     return db.query(ProfileProxy).filter(ProfileProxy.id == profile_id).first()
 

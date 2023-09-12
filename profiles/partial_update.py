@@ -18,7 +18,8 @@ def partial_update(
     payload: Dict,
     db: Session = Depends(get_db),
 ):
-    
+
     method = getattr(pu, f'update_{target}')
     method(db, profile_id, target_id, payload)
     db.commit()
+    return {'result': 'success'}
