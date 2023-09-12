@@ -80,6 +80,64 @@ def test_connection(
     return {'result': result}
 
 
+@router.get("/get_tables_list/{profile_id}/{source_id}")
+def get_tables_list(
+    profile_id: int,
+    source_id: str,
+    db: Session = Depends(get_db)
+):
+    profile = crud.get_profile(db, profile_id=profile_id)
+    rb = profile.get_report_builder()
+
+    tables = []
+    try:
+        source = rb.get_source(source_id)
+        with source.connection as conn:
+            tables = conn.get_tables()
+    except:
+        pass
+    return {'tables': tables}
+
+
+@router.get("/get_fields_list/{profile_id}/{source_id}/{table_name}")
+def get_tables_list(
+    profile_id: int,
+    source_id: str,
+    table_name: str,
+    db: Session = Depends(get_db)
+):
+    profile = crud.get_profile(db, profile_id=profile_id)
+    rb = profile.get_report_builder()
+
+    fields = []
+    try:
+        source = rb.get_source(source_id)
+        with source.connection as conn:
+            fields = conn.get_fields(table_name)
+    except:
+        pass
+    return {'fields': fields}
+
+
+@router.get("/get_db_structure/{profile_id}/{source_id}")
+def get_tables_list(
+    profile_id: int,
+    source_id: str,
+    db: Session = Depends(get_db)
+):
+    profile = crud.get_profile(db, profile_id=profile_id)
+    rb = profile.get_report_builder()
+
+    db_struct = {}
+    try:
+        source = rb.get_source(source_id)
+        with source.connection as conn:
+            db_struct = conn.get_db_structure()
+    except:
+        pass
+    return {'db': db_struct}
+
+
 @router.get("/get_query_data/{profile_id}/{query_id}")
 def get_query_data(
     profile_id: int,
