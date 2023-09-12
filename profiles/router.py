@@ -70,15 +70,13 @@ def test_connection(
     profile = crud.get_profile(db, profile_id=profile_id)
     rb = profile.get_report_builder()
 
+    source = rb.get_source(source_id)
     result = False
     try:
-        source = rb.get_source(source_id)
-        source.open()
-        result = source.connection.test()
+        with source.connection as conn:
+            result = conn.test()
     except:
         pass
-    finally:
-        source.close()
     return {'result': result}
 
 
