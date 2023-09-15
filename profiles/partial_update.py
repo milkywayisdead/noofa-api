@@ -26,7 +26,7 @@ def partial_update(
 
 
 @router.post("/partial_delete/{profile_id}/{target}/{target_id}")
-def partial_update(
+def partial_delete(
     profile_id: int,
     target: str,
     target_id: str,
