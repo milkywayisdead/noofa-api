@@ -12,14 +12,14 @@ h11==0.14.0
 httptools==0.6.0
 idna==3.4
 mysql-connector-python==8.1.0
-noofa==0.0.2
+noofa==0.1.0
 numpy==1.25.2
 packaging==23.1
 pandas==2.1.0
 Pillow==10.0.0
 plotly==5.16.1
 protobuf==4.21.12
-psycopg2==2.9.7
+psycopg2-binary==2.9.7
 pydantic==2.3.0
 pydantic_core==2.6.3
 pyodbc==4.0.39
