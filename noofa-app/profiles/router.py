@@ -1,10 +1,16 @@
 from typing import List
 
 from fastapi import Depends, APIRouter
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from ..db import crud, schemas
 from ..db.utils import get_db
+from .encoder import noofa_encoder
+from .utils import DfPreparer
+
+from noofa.utils import get_df_descriptor
 
 
 router = APIRouter()
@@ -157,7 +163,15 @@ def get_df_data(
 ):
     profile = crud.get_profile(db, profile_id=profile_id)
     rb = profile.get_report_builder()
-    return rb.get_data(df_id)
+    df = rb.get_or_build_dataframe(df_id)
+    desc = get_df_descriptor(df)
+    prep = DfPreparer(df)
+    resp = {
+        'data': prep.records,
+        'columns': desc.columns,
+    }
+    resp = jsonable_encoder(resp, custom_encoder=noofa_encoder)
+    return JSONResponse(content=resp)
 
 
 @router.get("/get_table/{profile_id}/{table_id}")
