@@ -169,6 +169,7 @@ def get_df_data(
     resp = {
         'data': prep.records,
         'columns': desc.columns,
+        'dtypes': desc.dtypes,
     }
     resp = jsonable_encoder(resp, custom_encoder=noofa_encoder)
     return JSONResponse(content=resp)
