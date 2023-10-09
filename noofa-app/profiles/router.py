@@ -175,15 +175,25 @@ def get_df_data(
     return JSONResponse(content=resp)
 
 
-@router.get("/get_table/{profile_id}/{table_id}")
-def get_table(
+@router.get("/get_table_data/{profile_id}/{table_id}")
+def get_table_data(
     profile_id: int,
     table_id: str,
     db: Session = Depends(get_db)
 ):
     profile = crud.get_profile(db, profile_id=profile_id)
     rb = profile.get_report_builder()
-    return rb.get_component(table_id)
+    table = rb.build_table(table_id)
+    df = table.df
+    desc = get_df_descriptor(df)
+    prep = DfPreparer(df)
+    resp = {
+        'data': prep.records,
+        'columns': desc.columns,
+        'dtypes': desc.dtypes,
+    }
+    resp = jsonable_encoder(resp, custom_encoder=noofa_encoder)
+    return JSONResponse(content=resp)
 
 
 @router.get("/get_figure/{profile_id}/{figure_id}")
