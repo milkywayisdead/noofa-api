@@ -196,12 +196,13 @@ def get_table_data(
     return JSONResponse(content=resp)
 
 
-@router.get("/get_figure/{profile_id}/{figure_id}")
-def get_figure(
+@router.get("/get_figure_data/{profile_id}/{figure_id}")
+def get_figure_data(
     profile_id: int,
     figure_id: str,
     db: Session = Depends(get_db)
 ):
     profile = crud.get_profile(db, profile_id=profile_id)
     rb = profile.get_report_builder()
-    return rb.get_component(figure_id)
+    figure = rb.build_figure(figure_id)
+    return figure.to_dict()
