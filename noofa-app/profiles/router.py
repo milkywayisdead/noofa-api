@@ -206,3 +206,19 @@ def get_figure_data(
     rb = profile.get_report_builder()
     figure = rb.build_figure(figure_id)
     return figure.to_dict()
+
+
+@router.get("/get_value/{profile_id}/{value_name}")
+def get_figure_data(
+    profile_id: int,
+    value_name: str,
+    db: Session = Depends(get_db)
+):
+    profile = crud.get_profile(db, profile_id=profile_id)
+    rb = profile.get_report_builder()
+    value = rb.get_value(value_name)
+
+    return {
+        'is_simple': value.is_simple,
+        'value': 'This value is not so simple!' if not value.is_simple else value.value
+    }

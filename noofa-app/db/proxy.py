@@ -8,6 +8,7 @@ class ProfileProxy(Profile):
         rb = ReportBuilder(
             data_config=self.data_config,
             components_config=self.components,
+            values=self.values,
         )
         return rb
     
