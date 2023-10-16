@@ -205,11 +205,13 @@ def get_figure_data(
     profile = crud.get_profile(db, profile_id=profile_id)
     rb = profile.get_report_builder()
     figure = rb.build_figure(figure_id)
-    return figure.to_dict()
+    data = figure.to_dict()
+    resp = jsonable_encoder(data, custom_encoder=noofa_encoder)
+    return JSONResponse(content=resp)
 
 
 @router.get("/get_value/{profile_id}/{value_name}")
-def get_figure_data(
+def get_value(
     profile_id: int,
     value_name: str,
     db: Session = Depends(get_db)
