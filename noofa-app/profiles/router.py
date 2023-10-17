@@ -1,7 +1,7 @@
 from typing import List
 
 from fastapi import Depends, APIRouter
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
@@ -224,3 +224,19 @@ def get_value(
         'is_simple': value.is_simple,
         'value': 'This value is not so simple!' if not value.is_simple else value.value
     }
+
+
+@router.get("/get_document/{profile_id}/{doc_id}")
+def get_document(
+    profile_id: int,
+    doc_id: str,
+    db: Session = Depends(get_db)
+):
+    profile = crud.get_profile(db, profile_id=profile_id)
+    doc = profile.make_pdf(doc_id)
+
+    return Response(
+        doc.getvalue(),
+        headers={'Content-Disposition': 'attachment; filename="document.pdf"'},
+        media_type='application/pdf',
+    )
