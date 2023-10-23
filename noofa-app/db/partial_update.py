@@ -3,7 +3,8 @@ import json
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
-from . import schemas
+#from . import schemas
+from .import crud
 from .proxy import ProfileProxy
 
 
@@ -42,6 +43,11 @@ def update_value(db: Session, profile_id: int, target_id: str, payload: dict):
     _update_target(*args, target='values')
 
 
+def update_dashboard(db: Session, dashboard_id: str, dashboard: dict):
+    args = (db, dashboard_id, dashboard)
+    crud.update_dashboard(*args)
+
+
 def delete_source(db: Session, profile_id: int, target_id: str):
     args = (db, profile_id, target_id)
     _delete_target(*args, target='sources')
@@ -74,6 +80,10 @@ def delete_doc(db: Session, profile_id: int, target_id: str):
 def delete_value(db: Session, profile_id: int, target_id: str):
     args = (db, profile_id, target_id)
     _delete_target(*args, target='values')
+
+
+def delete_dashboard(db: Session, dashboard_id: str):
+    crud.delete_dashboard(db, dashboard_id)
 
 
 def _update_target(

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from fastapi import Depends, APIRouter
 from fastapi.responses import JSONResponse, Response
@@ -19,15 +19,23 @@ router = APIRouter()
 @router.post("/create_profile/", response_model=schemas.Profile)
 def create_profile(
     profile: schemas.ProfileCreate,
+    dashboards: Dict,
     db: Session = Depends(get_db),
 ):
-    return crud.create_profile(db=db, profile=profile)
+
+    profile = crud.create_profile(db=db, profile=profile)
+
+    for _, dash_conf in dashboards.items():
+        dash_conf['profile_id'] = profile.id
+        crud.create_dashboard(db=db, dashboard=dash_conf)
+
+    return profile
 
 
-@router.get("/get_profile/{profile_id}/", response_model=schemas.Profile)
+@router.get("/get_profile/{profile_id}/")
 def get_profile(profile_id: int, db: Session = Depends(get_db)):
     profile = crud.get_profile(db, profile_id=profile_id)
-    return profile
+    return profile.to_dict()
 
 
 @router.get("/get_profiles/", response_model=List[schemas.Profile])
@@ -52,9 +60,18 @@ def profiles_details(limit: int = 10, db: Session = Depends(get_db)):
 def update_profile(
     profile_id: int,
     profile: dict,
+    dashboards: dict,
     db: Session = Depends(get_db)
 ):
     profile = crud.update_profile(db, profile_id=profile_id, profile=profile)
+
+    for dash_id, dash_conf in dashboards.items():
+        try:
+            crud.update_dashboard(dash_id, dash_conf)
+        except:
+            dash_conf['profile_id'] = profile.id
+            crud.create_dashboard(dash_conf)
+
     return profile
 
 
@@ -240,3 +257,22 @@ def get_document(
         headers={'Content-Disposition': 'attachment; filename="document.pdf"'},
         media_type='application/pdf',
     )
+
+
+@router.get("/dashboard/{dashboard_id}", response_model=schemas.DashboardDetails)
+def get_dashboard(
+    dashboard_id: str,
+    db: Session = Depends(get_db)
+):
+    dashboard = crud.get_dashboard(db, dashboard_id=dashboard_id)
+
+    return dashboard
+
+
+@router.post("/delete_dashboard/{dashboard_id}")
+def delete_dashboard(
+    dashboard_id: str,
+    db: Session = Depends(get_db)
+):
+    result = crud.delete_dashboard(db, dashboard_id)
+    return {'result': result, 'msg': f'Dashboard {dashboard_id} has been deleted'}

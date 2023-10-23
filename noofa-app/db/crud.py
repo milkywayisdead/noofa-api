@@ -2,7 +2,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 
 from . import schemas
-from .proxy import ProfileProxy
+from .proxy import ProfileProxy, DashboardProxy
 
 
 def get_profile(db: Session, profile_id: int):
@@ -31,5 +31,31 @@ def update_profile(db: Session, profile_id: int, profile: dict):
 
 def delete_profile(db: Session, profile_id: int):
     db.query(ProfileProxy).filter(ProfileProxy.id == profile_id).delete()
+    db.commit()
+    return True
+
+
+def get_dashboard(db: Session, dashboard_id: str):
+    return db.query(DashboardProxy).filter(
+        DashboardProxy.id == dashboard_id
+    ).first()
+
+
+def create_dashboard(db: Session, dashboard: dict):
+    db_dashboard = DashboardProxy(**dashboard)
+    db.add(db_dashboard)
+    db.commit()
+    db.refresh(db_dashboard)
+    return db_dashboard
+
+
+def update_dashboard(db: Session, dashboard_id: str, dashboard: dict):
+    db.query(DashboardProxy).filter(DashboardProxy.id == dashboard_id).update(dashboard)
+    db.commit()
+    return db.query(DashboardProxy).filter(DashboardProxy.id == dashboard_id).first()
+
+
+def delete_dashboard(db: Session, dashboard_id: str):
+    db.query(DashboardProxy).filter(DashboardProxy.id == dashboard_id).delete()
     db.commit()
     return True

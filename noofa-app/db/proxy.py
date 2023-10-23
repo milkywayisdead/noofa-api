@@ -1,6 +1,6 @@
 import io
 
-from .models import Profile
+from .models import Profile, Dashboard
 
 from noofa import ReportBuilder
 from noofa.utils import PdfReport
@@ -43,3 +43,23 @@ class ProfileProxy(Profile):
         pdf_report.save()
 
         return buffer
+    
+    def to_dict(self):
+        profile_dict = {}
+        for attr in [
+            'id', 'name', 'description',
+            'created', 'last_update',
+            'sources', 'queries', 'dataframes',
+            'components', 'docs', 'values',
+        ]:
+            profile_dict[attr] = getattr(self, attr)
+
+        profile_dict['dashboards'] = {
+            dash.id: dash.to_dict() for dash in self.dashboards
+        }
+
+        return profile_dict
+    
+
+class DashboardProxy(Dashboard):
+    pass

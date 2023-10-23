@@ -38,3 +38,19 @@ class ProfileDetails(BaseModel):
 
 class ProfileUpdate(BaseModel):
     last_update: datetime.datetime
+
+
+class Dashboard(BaseModel):
+    name: str
+    description: str
+    profile_id: int
+    properties: Dict
+    widgets: Dict
+
+
+class DashboardCreate(Dashboard):
+    pass
+
+
+class DashboardDetails(Dashboard):
+    id: str
