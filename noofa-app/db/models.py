@@ -31,7 +31,10 @@ class Profile(Base):
     values = Column(JSON, default=dict)
     is_template = Column(Boolean, default=False)
 
-    dashboards = relationship('Dashboard', back_populates='profile')
+    dashboards = relationship(
+        'Dashboard',
+        back_populates='profile',
+    )
 
 
 def _get_uuid():
@@ -42,7 +45,8 @@ class Dashboard(Base):
     __tablename__ = 'dashboards'
 
     id = Column(String, primary_key=True, default=_get_uuid)
-    profile_id = Column(Integer, ForeignKey('profiles.id'))
+    contextual_id = Column(String)
+    profile_id = Column(Integer, ForeignKey('profiles.id'), nullable=False)
     name = Column(String)
     description = Column(Text)
     properties = Column(JSON, default=dict)
@@ -53,7 +57,7 @@ class Dashboard(Base):
     def to_dict(self):
         dash_dict = {}
         for attr in [
-            'id', 'name', 'description',
+            'id', 'name', 'description', 'contextual_id',
             'profile_id', 'properties', 'widgets',
         ]:
             dash_dict[attr] = getattr(self, attr)

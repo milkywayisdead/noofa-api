@@ -18,10 +18,13 @@ def partial_update(
     payload: Dict,
     db: Session = Depends(get_db),
 ):
-
-    method = getattr(pu, f'update_{target}')
-    method(db, profile_id, target_id, payload)
-    db.commit()
+    if target == 'dashboard':
+        payload['profile_id'] = profile_id
+        pu.update_dashboard(db, target_id, payload)
+    else:
+        method = getattr(pu, f'update_{target}')
+        method(db, profile_id, target_id, payload)
+        db.commit()
     return {'result': 'success'}
 
 

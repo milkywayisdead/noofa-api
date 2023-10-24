@@ -55,7 +55,7 @@ class ProfileProxy(Profile):
             profile_dict[attr] = getattr(self, attr)
 
         profile_dict['dashboards'] = {
-            dash.id: dash.to_dict() for dash in self.dashboards
+            dash.contextual_id: dash.to_dict() for dash in self.dashboards
         }
 
         return profile_dict

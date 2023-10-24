@@ -15,6 +15,7 @@ def get_profiles(db: Session, limit: int = 10):
 
 def create_profile(db: Session, profile: schemas.ProfileCreate):
     kw = profile.dict()
+    kw.pop('dashboards')
     db_profile = ProfileProxy(**kw)
     db.add(db_profile)
     db.commit()
@@ -29,8 +30,18 @@ def update_profile(db: Session, profile_id: int, profile: dict):
     return db.query(ProfileProxy).filter(ProfileProxy.id == profile_id).first()
 
 
+# Yeah, this is stupid
+def delete_profile_dashboards(db, profile_id: int):
+    db.query(DashboardProxy).filter(DashboardProxy.profile_id == profile_id).delete()
+    return True
+
+
 def delete_profile(db: Session, profile_id: int):
     db.query(ProfileProxy).filter(ProfileProxy.id == profile_id).delete()
+
+    # yeah, so stupid
+    delete_profile_dashboards(db, profile_id)
+
     db.commit()
     return True
 
@@ -39,6 +50,10 @@ def get_dashboard(db: Session, dashboard_id: str):
     return db.query(DashboardProxy).filter(
         DashboardProxy.id == dashboard_id
     ).first()
+
+
+def get_dashboards(db: Session, limit: int = 10):
+    return db.query(DashboardProxy).limit(limit).all()
 
 
 def create_dashboard(db: Session, dashboard: dict):

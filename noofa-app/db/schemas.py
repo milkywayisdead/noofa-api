@@ -16,7 +16,7 @@ class ProfileBase(BaseModel):
 
 
 class ProfileCreate(ProfileBase):
-    pass
+    dashboards: Dict
 
 
 class Profile(ProfileBase):

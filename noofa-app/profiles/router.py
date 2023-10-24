@@ -19,17 +19,16 @@ router = APIRouter()
 @router.post("/create_profile/", response_model=schemas.Profile)
 def create_profile(
     profile: schemas.ProfileCreate,
-    dashboards: Dict,
     db: Session = Depends(get_db),
 ):
 
-    profile = crud.create_profile(db=db, profile=profile)
+    new_profile = crud.create_profile(db=db, profile=profile)
 
-    for _, dash_conf in dashboards.items():
-        dash_conf['profile_id'] = profile.id
+    for _, dash_conf in profile.dashboards.items():
+        dash_conf['profile_id'] = new_profile.id
         crud.create_dashboard(db=db, dashboard=dash_conf)
 
-    return profile
+    return new_profile
 
 
 @router.get("/get_profile/{profile_id}/")
@@ -60,19 +59,19 @@ def profiles_details(limit: int = 10, db: Session = Depends(get_db)):
 def update_profile(
     profile_id: int,
     profile: dict,
-    dashboards: dict,
     db: Session = Depends(get_db)
 ):
-    profile = crud.update_profile(db, profile_id=profile_id, profile=profile)
+    dashboards = profile.pop('dashboards')
+    updated_profile = crud.update_profile(db, profile_id=profile_id, profile=profile)
 
-    for dash_id, dash_conf in dashboards.items():
+    for _, dash_conf in dashboards.items():
         try:
-            crud.update_dashboard(dash_id, dash_conf)
+            crud.update_dashboard(db, dash_conf['id'], dash_conf)
         except:
-            dash_conf['profile_id'] = profile.id
-            crud.create_dashboard(dash_conf)
+            dash_conf['profile_id'] = updated_profile.id
+            crud.create_dashboard(db, dash_conf)
 
-    return profile
+    return updated_profile
 
 
 @router.post("/delete_profile/{profile_id}")
@@ -267,6 +266,12 @@ def get_dashboard(
     dashboard = crud.get_dashboard(db, dashboard_id=dashboard_id)
 
     return dashboard
+
+
+@router.get("/get_dashboards/", response_model=List[schemas.DashboardDetails])
+def get_dashboards(limit: int = 10, db: Session = Depends(get_db)):
+    dashboards = crud.get_dashboards(db, limit=limit)
+    return dashboards
 
 
 @router.post("/delete_dashboard/{dashboard_id}")

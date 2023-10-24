@@ -44,8 +44,11 @@ def update_value(db: Session, profile_id: int, target_id: str, payload: dict):
 
 
 def update_dashboard(db: Session, dashboard_id: str, dashboard: dict):
-    args = (db, dashboard_id, dashboard)
-    crud.update_dashboard(*args)
+    if dashboard_id == 'null':
+        crud.create_dashboard(db, dashboard)
+    else:
+        args = (db, dashboard_id, dashboard)
+        crud.update_dashboard(*args)
 
 
 def delete_source(db: Session, profile_id: int, target_id: str):
