@@ -20,7 +20,8 @@ def partial_update(
 ):
     if target == 'dashboard':
         payload['profile_id'] = profile_id
-        pu.update_dashboard(db, target_id, payload)
+        dash = pu.update_dashboard(db, target_id, payload)
+        return {'result': 'success', 'id': dash.id}
     else:
         method = getattr(pu, f'update_{target}')
         method(db, profile_id, target_id, payload)
@@ -35,8 +36,10 @@ def partial_delete(
     target_id: str,
     db: Session = Depends(get_db),
 ):
-
-    method = getattr(pu, f'delete_{target}')
-    method(db, profile_id, target_id)
-    db.commit()
+    if target == 'dashboard':
+        pu.delete_dashboard(db, target_id)
+    else:
+        method = getattr(pu, f'delete_{target}')
+        method(db, profile_id, target_id)
+        db.commit()
     return {'result': 'success'}
