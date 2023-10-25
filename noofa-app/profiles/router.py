@@ -16,7 +16,7 @@ from noofa.utils import get_df_descriptor
 router = APIRouter()
 
 
-@router.post("/create_profile/", response_model=schemas.Profile)
+@router.post("/create_profile/")
 def create_profile(
     profile: schemas.ProfileCreate,
     db: Session = Depends(get_db),
@@ -28,7 +28,7 @@ def create_profile(
         dash_conf['profile_id'] = new_profile.id
         crud.create_dashboard(db=db, dashboard=dash_conf)
 
-    return new_profile
+    return new_profile.to_dict()
 
 
 @router.get("/get_profile/{profile_id}/")
