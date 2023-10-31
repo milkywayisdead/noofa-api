@@ -1,7 +1,7 @@
-from typing import List
+from typing import List, Dict
 
 from fastapi import Depends, APIRouter
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
@@ -16,18 +16,25 @@ from noofa.utils import get_df_descriptor
 router = APIRouter()
 
 
-@router.post("/create_profile/", response_model=schemas.Profile)
+@router.post("/create_profile/")
 def create_profile(
     profile: schemas.ProfileCreate,
     db: Session = Depends(get_db),
 ):
-    return crud.create_profile(db=db, profile=profile)
+
+    new_profile = crud.create_profile(db=db, profile=profile)
+
+    for _, dash_conf in profile.dashboards.items():
+        dash_conf['profile_id'] = new_profile.id
+        crud.create_dashboard(db=db, dashboard=dash_conf)
+
+    return new_profile.to_dict()
 
 
-@router.get("/get_profile/{profile_id}/", response_model=schemas.Profile)
+@router.get("/get_profile/{profile_id}/")
 def get_profile(profile_id: int, db: Session = Depends(get_db)):
     profile = crud.get_profile(db, profile_id=profile_id)
-    return profile
+    return profile.to_dict()
 
 
 @router.get("/get_profiles/", response_model=List[schemas.Profile])
@@ -54,8 +61,17 @@ def update_profile(
     profile: dict,
     db: Session = Depends(get_db)
 ):
-    profile = crud.update_profile(db, profile_id=profile_id, profile=profile)
-    return profile
+    dashboards = profile.pop('dashboards')
+    updated_profile = crud.update_profile(db, profile_id=profile_id, profile=profile)
+
+    for _, dash_conf in dashboards.items():
+        try:
+            crud.update_dashboard(db, dash_conf['id'], dash_conf)
+        except:
+            dash_conf['profile_id'] = updated_profile.id
+            crud.create_dashboard(db, dash_conf)
+
+    return updated_profile
 
 
 @router.post("/delete_profile/{profile_id}")
@@ -196,12 +212,72 @@ def get_table_data(
     return JSONResponse(content=resp)
 
 
-@router.get("/get_figure/{profile_id}/{figure_id}")
-def get_figure(
+@router.get("/get_figure_data/{profile_id}/{figure_id}")
+def get_figure_data(
     profile_id: int,
     figure_id: str,
     db: Session = Depends(get_db)
 ):
     profile = crud.get_profile(db, profile_id=profile_id)
     rb = profile.get_report_builder()
-    return rb.get_component(figure_id)
+    figure = rb.build_figure(figure_id)
+    data = figure.to_dict()
+    resp = jsonable_encoder(data, custom_encoder=noofa_encoder)
+    return JSONResponse(content=resp)
+
+
+@router.get("/get_value/{profile_id}/{value_name}")
+def get_value(
+    profile_id: int,
+    value_name: str,
+    db: Session = Depends(get_db)
+):
+    profile = crud.get_profile(db, profile_id=profile_id)
+    rb = profile.get_report_builder()
+    value = rb.get_value(value_name)
+
+    return {
+        'is_simple': value.is_simple,
+        'value': 'This value is not so simple!' if not value.is_simple else value.value
+    }
+
+
+@router.get("/get_document/{profile_id}/{doc_id}")
+def get_document(
+    profile_id: int,
+    doc_id: str,
+    db: Session = Depends(get_db)
+):
+    profile = crud.get_profile(db, profile_id=profile_id)
+    doc = profile.make_pdf(doc_id)
+
+    return Response(
+        doc.getvalue(),
+        headers={'Content-Disposition': 'attachment; filename="document.pdf"'},
+        media_type='application/pdf',
+    )
+
+
+@router.get("/dashboard/{dashboard_id}", response_model=schemas.DashboardDetails)
+def get_dashboard(
+    dashboard_id: str,
+    db: Session = Depends(get_db)
+):
+    dashboard = crud.get_dashboard(db, dashboard_id=dashboard_id)
+
+    return dashboard
+
+
+@router.get("/get_dashboards/", response_model=List[schemas.DashboardDetails])
+def get_dashboards(limit: int = 10, db: Session = Depends(get_db)):
+    dashboards = crud.get_dashboards(db, limit=limit)
+    return dashboards
+
+
+@router.post("/delete_dashboard/{dashboard_id}")
+def delete_dashboard(
+    dashboard_id: str,
+    db: Session = Depends(get_db)
+):
+    result = crud.delete_dashboard(db, dashboard_id)
+    return {'result': result, 'msg': f'Dashboard {dashboard_id} has been deleted'}

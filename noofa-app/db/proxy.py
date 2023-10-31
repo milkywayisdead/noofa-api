@@ -1,6 +1,9 @@
-from .models import Profile
+import io
+
+from .models import Profile, Dashboard
 
 from noofa import ReportBuilder
+from noofa.utils import PdfReport
 
 
 class ProfileProxy(Profile):
@@ -8,6 +11,7 @@ class ProfileProxy(Profile):
         rb = ReportBuilder(
             data_config=self.data_config,
             components_config=self.components,
+            values=self.values,
         )
         return rb
     
@@ -18,3 +22,44 @@ class ProfileProxy(Profile):
             'queries': self.queries,
             'dataframes': self.dataframes,
         }
+    
+    def make_pdf(self, doc_id):
+        doc = self.docs.get(doc_id)
+        components = []
+        rb = self.get_report_builder()
+
+        for cmp_id in doc['components']:
+            try:
+                component = rb.get_component(cmp_id)
+                component.build()
+            except:
+                pass
+            else:
+                components.append(component)
+
+        buffer = io.BytesIO()
+        pdf_report = PdfReport(buffer, orientation='landscape')
+        pdf_report.from_list(components)
+        pdf_report.save()
+
+        return buffer
+    
+    def to_dict(self):
+        profile_dict = {}
+        for attr in [
+            'id', 'name', 'description',
+            'created', 'last_update',
+            'sources', 'queries', 'dataframes',
+            'components', 'docs', 'values',
+        ]:
+            profile_dict[attr] = getattr(self, attr)
+
+        profile_dict['dashboards'] = {
+            dash.contextual_id: dash.to_dict() for dash in self.dashboards
+        }
+
+        return profile_dict
+    
+
+class DashboardProxy(Dashboard):
+    pass

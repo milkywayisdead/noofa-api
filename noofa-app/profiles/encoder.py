@@ -1,5 +1,6 @@
-import numpy
+import numpy as np
 
 noofa_encoder = {
-    numpy.int64: lambda x: x.item(),
+    np.int64: lambda x: x.item(),
+    np.ndarray: lambda x: x.tolist(),
 }
