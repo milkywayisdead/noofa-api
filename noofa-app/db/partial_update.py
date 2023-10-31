@@ -66,12 +66,13 @@ def delete_dataframe(db: Session, profile_id: int, target_id: str):
     args = (db, profile_id, target_id)
     _delete_target(*args, target='dataframes')
 
+
 def delete_table(db: Session, profile_id: int, target_id: str):
     args = (db, profile_id, target_id)
     _delete_target(*args, target='tables')
 
 
-def delete_figures(db: Session, profile_id: int, target_id: str):
+def delete_figure(db: Session, profile_id: int, target_id: str):
     args = (db, profile_id, target_id)
     _delete_target(*args, target='figures')
 
