@@ -80,7 +80,11 @@ def delete_profile(
     db: Session = Depends(get_db)
 ):
     result = crud.delete_profile(db, profile_id)
-    return {'result': result, 'msg': f'Profile {profile_id} has been deleted'}
+    return {
+        'result': result,
+        'msg': f'Profile {profile_id} has been deleted',
+        'id': profile_id
+    }
 
 
 @router.get("/test_connection/{profile_id}/{source_id}")
