@@ -1,28 +1,12 @@
 import io
 
 from .models import Profile, Dashboard
+from ..profiles.utils import DfPreparer
 
-from noofa import ReportBuilder
-from noofa.utils import PdfReport
+from noofa.utils import get_df_descriptor, PdfReport
 
 
-class ProfileProxy(Profile):
-    def get_report_builder(self):
-        rb = ReportBuilder(
-            data_config=self.data_config,
-            components_config=self.components,
-            values=self.values,
-        )
-        return rb
-    
-    @property
-    def data_config(self):
-        return {
-            'sources': self.sources,
-            'queries': self.queries,
-            'dataframes': self.dataframes,
-        }
-    
+class ProfileProxy(Profile):    
     def make_pdf(self, doc_id):
         doc = self.docs.get(doc_id)
         components = []
@@ -62,4 +46,34 @@ class ProfileProxy(Profile):
     
 
 class DashboardProxy(Dashboard):
-    pass
+    def get_widget_data(self, widgetId):
+        widget = self.widgets[widgetId]
+        rb = self.profile.get_report_builder()
+
+        widget_data = None
+        w_type = widget['type']
+
+        if w_type == 'text':
+            value = widget['props']['text']
+            if widget['props']['interprete']:
+                widget_data = rb.evaluate(value)
+            else:
+                widget_data = value
+
+        elif w_type == 'table':
+            table_id = widget['props']['tableId']
+            table = rb.build_table(table_id)
+            df = table.df
+            desc = get_df_descriptor(df)
+            prep = DfPreparer(df)
+            widget_data = {
+                'data': prep.records,
+                'columns': desc.columns,
+                'dtypes': desc.dtypes,
+            }
+
+        elif w_type == 'figure':
+            figure = rb.build_figure(widget['props']['figureId'])
+            widget_data = figure.to_dict()
+
+        return widget_data

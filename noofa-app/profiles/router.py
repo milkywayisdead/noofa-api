@@ -285,3 +285,15 @@ def delete_dashboard(
 ):
     result = crud.delete_dashboard(db, dashboard_id)
     return {'result': result, 'msg': f'Dashboard {dashboard_id} has been deleted'}
+
+
+@router.get("/get_widget_data/{dashboard_id}/{widget_id}")
+def get_widget_data(
+    dashboard_id: str,
+    widget_id: str,
+    db: Session = Depends(get_db)
+):
+    dashboard = crud.get_dashboard(db, dashboard_id=dashboard_id)
+    widget_data = dashboard.get_widget_data(widget_id)
+    resp = jsonable_encoder(widget_data, custom_encoder=noofa_encoder)
+    return JSONResponse(content=resp)
