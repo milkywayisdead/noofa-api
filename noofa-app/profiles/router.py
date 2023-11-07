@@ -262,7 +262,7 @@ def get_document(
     )
 
 
-@router.get("/dashboard/{dashboard_id}", response_model=schemas.DashboardDetails)
+@router.get("/get_dashboard/{dashboard_id}", response_model=schemas.DashboardDetails)
 def get_dashboard(
     dashboard_id: str,
     db: Session = Depends(get_db)
