@@ -1,9 +1,7 @@
 # noofa-api
 ```
-Some description someday, maybe.
+Noofa-app's api, using tools of noofa package.
 ```
-
-
 
 # warning
 ```
