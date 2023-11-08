@@ -11,6 +11,7 @@ from sqlalchemy import (
     ForeignKey,
 )
 from sqlalchemy.orm import relationship
+from noofa import ReportBuilder
 
 from .database import Base
 
@@ -35,6 +36,22 @@ class Profile(Base):
         'Dashboard',
         back_populates='profile',
     )
+
+    def get_report_builder(self):
+        rb = ReportBuilder(
+            data_config=self.data_config,
+            components_config=self.components,
+            values=self.values,
+        )
+        return rb
+    
+    @property
+    def data_config(self):
+        return {
+            'sources': self.sources,
+            'queries': self.queries,
+            'dataframes': self.dataframes,
+        }
 
 
 def _get_uuid():

@@ -80,7 +80,11 @@ def delete_profile(
     db: Session = Depends(get_db)
 ):
     result = crud.delete_profile(db, profile_id)
-    return {'result': result, 'msg': f'Profile {profile_id} has been deleted'}
+    return {
+        'result': result,
+        'msg': f'Profile {profile_id} has been deleted',
+        'id': profile_id
+    }
 
 
 @router.get("/test_connection/{profile_id}/{source_id}")
@@ -258,7 +262,7 @@ def get_document(
     )
 
 
-@router.get("/dashboard/{dashboard_id}", response_model=schemas.DashboardDetails)
+@router.get("/get_dashboard/{dashboard_id}", response_model=schemas.DashboardDetails)
 def get_dashboard(
     dashboard_id: str,
     db: Session = Depends(get_db)
@@ -281,3 +285,15 @@ def delete_dashboard(
 ):
     result = crud.delete_dashboard(db, dashboard_id)
     return {'result': result, 'msg': f'Dashboard {dashboard_id} has been deleted'}
+
+
+@router.get("/get_widget_data/{dashboard_id}/{widget_id}")
+def get_widget_data(
+    dashboard_id: str,
+    widget_id: str,
+    db: Session = Depends(get_db)
+):
+    dashboard = crud.get_dashboard(db, dashboard_id=dashboard_id)
+    widget_data = dashboard.get_widget_data(widget_id)
+    resp = jsonable_encoder(widget_data, custom_encoder=noofa_encoder)
+    return JSONResponse(content=resp)
