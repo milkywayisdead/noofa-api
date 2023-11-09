@@ -12,7 +12,7 @@ h11==0.14.0
 httptools==0.6.0
 idna==3.4
 mysql-connector-python==8.1.0
-noofa==0.1.0
+noofa==0.1.1
 numpy==1.25.2
 packaging==23.1
 pandas==2.1.0
@@ -41,4 +41,3 @@ urllib3==2.0.4
 uvicorn==0.23.2
 watchfiles==0.20.0
 websockets==11.0.3
-kaleido==0.2.1

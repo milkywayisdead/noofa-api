@@ -3,7 +3,6 @@ RUN apt-get update
 RUN apt-get install g++ unixodbc-dev -y
 RUN python3 -m ensurepip
 RUN pip3 install --user pyodbc
-RUN apk add --upgrade font-dejavu
 WORKDIR /app
 COPY ./noofa-app ./noofa-app
 COPY ./requirements.txt ./
